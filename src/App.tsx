@@ -103,8 +103,8 @@ function CodeBlock({ code }: { code: string }) {
     <div className="code-block">
       <div className="code-toolbar">
         <span>
-          <Code2 size={14} /> exemple.tsx{" "}
-          <span className="code-caption">· extrait pédagogique</span>
+          <Code2 size={14} /> App.tsx{" "}
+          <span className="code-caption">· composant autonome</span>
         </span>
         <button onClick={copy} aria-label="Copier le code">
           {copied ? <Check size={14} /> : <Copy size={14} />}
@@ -147,8 +147,8 @@ function CodeBlock({ code }: { code: string }) {
         </code>
       </pre>
       <div className="code-footer">
-        Les imports et une partie du JSX sont omis pour concentrer la lecture
-        sur la notion.
+        Copiez ce fichier dans App.tsx d’un projet React 19.2 + TypeScript.
+        Les imports, le JSX et les fonctions nécessaires sont inclus ; aucun serveur requis.
       </div>
     </div>
   );

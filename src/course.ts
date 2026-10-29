@@ -1,3 +1,5 @@
+import { examples } from "./examples";
+
 export type Lesson = {
   id: string;
   title: string;
@@ -55,15 +57,7 @@ export const lessons: Lesson[] = [
     ],
     details:
       "Les hooks personnalisés commencent par use. Ils respectent les mêmes règles. L’API use a des règles particulières et ne fait pas partie des 18 hooks de ce parcours. En développement, Strict Mode réexécute certains traitements pour révéler les impuretés : ne cherchez pas à masquer ces vérifications.",
-    code: `function Detail() {
-  const [visible, setVisible] = useState(false);
-  const [count, setCount] = useState(0);
-  // Les deux hooks sont toujours appelés, dans cet ordre.
-  return <>
-    <button onClick={() => setVisible(v => !v)}>Détail</button>
-    {visible && <button onClick={() => setCount(c => c + 1)}>{count}</button>}
-  </>;
-}`,
+    code: examples.regles,
     question: "Où peut-on appeler useState ?",
     options: [
       "Dans un gestionnaire de clic",
@@ -104,20 +98,7 @@ export const lessons: Lesson[] = [
     ],
     details:
       "React regroupe les mises à jour. Une initialisation coûteuse peut être passée sous forme de fonction : useState(() => calcul()). L’initialiseur et les fonctions de mise à jour doivent être purs. Strict Mode peut les appeler deux fois en développement. React peut ignorer une mise à jour si Object.is juge les valeurs identiques.",
-    code: `const [count, setCount] = useState<number>(0);
-
-function addThree() {
-  // Chaque fonction reçoit le résultat de la précédente.
-  setCount(c => c + 1);
-  setCount(c => c + 1);
-  setCount(c => c + 1);
-}
-
-// Pour un objet, créer une nouvelle valeur :
-const [profile, setProfile] = useState({ name: 'Ada', active: true });
-function rename(name: string) {
-  setProfile(previous => ({ ...previous, name }));
-}`,
+    code: examples.useState,
     question:
       "count vaut 0. Trois setCount(count + 1) dans le même clic donnent…",
     options: ["1", "3", "0"],
@@ -155,16 +136,7 @@ function rename(name: string) {
     ],
     details:
       "React renseigne la ref DOM après le commit et la remet à null quand le nœud disparaît. Le type HTMLInputElement | null rappelle de traiter cette absence. Une ref peut conserver un timer à nettoyer lors du démontage.",
-    code: `const inputRef = useRef<HTMLInputElement>(null);
-const clicks = useRef(0);
-
-function focus() {
-  inputRef.current?.focus();
-}
-function countClick() {
-  clicks.current += 1; // Aucun rendu demandé.
-}
-// Dans le JSX : <input ref={inputRef} />`,
+    code: examples.useRef,
     question: "Modifier ref.current provoque-t-il un rendu ?",
     options: ["Toujours", "Jamais à lui seul", "Seulement avec une ref DOM"],
     answer: 1,
@@ -201,14 +173,7 @@ function countClick() {
     ],
     details:
       "useId est conçu pour rester cohérent entre serveur et client si les arbres correspondent. Il ne s’agit ni d’un identifiant métier ni d’une valeur destinée à être analysée. Le format exact de l’identifiant est un détail de React.",
-    code: `function EmailField() {
-  const id = useId();
-  return <div>
-    <label htmlFor={id}>Adresse e-mail</label>
-    <input id={id} aria-describedby={id + '-help'} />
-    <small id={id + '-help'}>Votre adresse professionnelle.</small>
-  </div>;
-}`,
+    code: examples.useId,
     question: "Quelle est la bonne clé pour une liste de produits ?",
     options: ["useId()", "Math.random()", "product.id"],
     answer: 2,
@@ -245,16 +210,7 @@ function countClick() {
     ],
     details:
       "dispatch est stable. Comme un setter, il demande le prochain rendu sans modifier la variable state du rendu courant. Un reducer peut être testé indépendamment du composant. useReducer n’est pas un store global : sa portée reste celle du composant qui l’appelle.",
-    code: `type Action = { type: 'add' } | { type: 'remove' };
-function reducer(quantity: number, action: Action): number {
-  switch (action.type) {
-    case 'add': return quantity + 1;
-    case 'remove': return Math.max(0, quantity - 1);
-  }
-}
-const [quantity, dispatch] = useReducer(reducer, 0);
-const total = quantity * 12; // Dérivé, pas un deuxième état.
-// dispatch({ type: 'add' })`,
+    code: examples.useReducer,
     question: "Un reducer devrait…",
     options: [
       "Appeler le serveur",
@@ -294,17 +250,7 @@ const total = quantity * 12; // Dérivé, pas un deuxième état.
     ],
     details:
       "Le provider doit être au-dessus du composant qui appelle useContext. La valeur par défaut ne sert qu’en l’absence de provider. Un enfant mémorisé avec memo reçoit quand même les nouvelles valeurs des contextes qu’il lit. React 19 permet <ThemeContext value={theme}>.",
-    code: `type Theme = 'clair' | 'sombre';
-const ThemeContext = createContext<Theme>('clair');
-
-function Preview() {
-  const theme = useContext(ThemeContext);
-  return <div data-theme={theme}>Thème : {theme}</div>;
-}
-function Example() {
-  const [theme, setTheme] = useState<Theme>('clair');
-  return <ThemeContext value={theme}><Preview /></ThemeContext>;
-}`,
+    code: examples.useContext,
     question: "Quel provider useContext choisit-il ?",
     options: [
       "Le premier dans l’application",
@@ -344,16 +290,7 @@ function Example() {
     ],
     details:
       "Une fonction de calcul sans hook peut rester une fonction ordinaire. Pour partager un état entre composants, remontez-le dans leur parent ou utilisez un contexte. Un hook personnalisé respecte toutes les règles d’appel et doit documenter ses paramètres réactifs.",
-    code: `function useCounter(initial = 0) {
-  const [count, setCount] = useState(initial);
-  return {
-    count,
-    increment: () => setCount(c => c + 1),
-    reset: () => setCount(initial),
-  };
-}
-const first = useCounter();
-const second = useCounter(10); // État indépendant.`,
+    code: examples.custom,
     question: "Deux appels à useCounter() partagent…",
     options: [
       "Le même état",
@@ -393,20 +330,7 @@ const second = useCounter(10); // État indépendant.`,
     ],
     details:
       "Sans tableau, l’effet s’exécute après chaque commit. Avec [], il ne dépend d’aucune valeur réactive du composant ; cela ne signifie pas « une seule fois pour toujours ». En Strict Mode, un cycle installation → nettoyage → installation supplémentaire vérifie la robustesse en développement. Une requête annulée ne doit pas être présentée comme une erreur métier.",
-    code: `useEffect(() => {
-  const controller = new AbortController();
-  setStatus('loading');
-  fetch(url, { signal: controller.signal })
-    .then(response => {
-      if (!response.ok) throw new Error('Erreur réseau');
-      return response.json();
-    })
-    .then(data => { setResults(data); setStatus('success'); })
-    .catch((error: unknown) => {
-      if (!controller.signal.aborted) setStatus('error');
-    });
-  return () => controller.abort();
-}, [url]);`,
+    code: examples.useEffect,
     question: "Quand le nettoyage est-il exécuté ?",
     options: [
       "Uniquement à la fermeture de l’onglet",
@@ -447,13 +371,7 @@ const second = useCounter(10); // État indépendant.`,
     ],
     details:
       "useEffectEvent est disponible à partir de React 19.2. Il lit les dernières valeurs du rendu validé. Son retour ne doit pas être ajouté aux dépendances de l’effet. Ce mécanisme est destiné à la logique non réactive appelée depuis des effets, pas à une mémorisation générale de callbacks.",
-    code: `const onMessage = useEffectEvent(() => {
-  setMessages(items => [...items, 'Notification, thème : ' + theme]);
-});
-useEffect(() => {
-  const timer = setInterval(() => onMessage(), 2500);
-  return () => clearInterval(timer);
-}, [room]); // theme ne détermine pas la connexion.`,
+    code: examples.useEffectEvent,
     question: "Changer theme doit-il reconnecter la salle ?",
     options: [
       "Oui, toujours",
@@ -493,13 +411,7 @@ useEffect(() => {
     ],
     details:
       "useLayoutEffect bloque le paint et ses mises à jour d’état sont traitées avant l’affichage. Les effets ne s’exécutent pas pendant le rendu serveur. Pour observer un redimensionnement externe continu, on peut connecter un ResizeObserver avec un nettoyage adapté.",
-    code: `const box = useRef<HTMLDivElement>(null);
-const [width, setWidth] = useState(240);
-const [measured, setMeasured] = useState(0);
-useLayoutEffect(() => {
-  setMeasured(box.current?.getBoundingClientRect().width ?? 0);
-}, [width]);
-// <div ref={box} style={{ width }} />`,
+    code: examples.useLayoutEffect,
     question: "Quel coût faut-il surveiller ?",
     options: [
       "Le blocage du paint",
@@ -539,15 +451,7 @@ useLayoutEffect(() => {
     ],
     details:
       "React 19 permet de recevoir ref directement comme prop. Dans React 18, forwardRef était nécessaire pour les composants fonctionnels. Préférez une API déclarative pour les données et le rendu ; le focus et la sélection sont des cas impératifs légitimes.",
-    code: `type Handle = { focus(): void; select(): void };
-function Field({ ref }: { ref: React.Ref<Handle> }) {
-  const input = useRef<HTMLInputElement>(null);
-  useImperativeHandle(ref, () => ({
-    focus: () => input.current?.focus(),
-    select: () => input.current?.select(),
-  }), []);
-  return <input ref={input} defaultValue="Bonjour React" />;
-}`,
+    code: examples.useImperativeHandle,
     question: "Pour ouvrir une modale, préférez en général…",
     options: [
       "Une prop open",
@@ -572,9 +476,9 @@ function Field({ ref }: { ref: React.Ref<Handle> }) {
       "Un calcul coûteux est refait alors que ses entrées n’ont pas changé.",
     mental:
       "React peut réutiliser le résultat précédent tant que les dépendances restent identiques.",
-    task: "Changez le filtre, puis le compteur indépendant. Comparez le temps de calcul des versions directe et mémorisée.",
+    task: "Recherchez « Carnet », puis cliquez sur le compteur sans modifier la recherche.",
     observe:
-      "Le filtre invalide le résultat mémorisé. Le compteur indépendant ne change pas ses dépendances.",
+      "Changer la recherche affiche « Mémoïsation utilisée : non » : le million de produits est filtré à nouveau. Cliquer sur le compteur affiche « oui » : la recherche est inchangée, le dernier résultat est réutilisé. useMemo conserve seulement le dernier résultat, pas l’historique des recherches. Le temps affiché mesure le filtrage ou la récupération du cache sur le rendu courant, hors affichage de la liste. Cinq résultats sont affichés pour garder la démo compacte. Le volume rend le coût du filtrage plus visible ; la durée dépend de la machine. Strict Mode peut exécuter le calcul deux fois en développement.",
     good: [
       "Mesurez avant d’optimiser.",
       "Incluez toutes les entrées réactives du calcul.",
@@ -587,11 +491,7 @@ function Field({ ref }: { ref: React.Ref<Handle> }) {
     ],
     details:
       "Les dépendances sont comparées avec Object.is. useMemo est une optimisation, pas une garantie sémantique de stockage. En développement Strict Mode peut exécuter le calcul deux fois. React Compiler peut automatiser une partie de ces optimisations ; ce projet le laisse désactivé pour rendre les mécanismes observables.",
-    code: `const result = useMemo(() => {
-  // Calcul pur, volontairement coûteux dans la démonstration.
-  return expensiveFilter(query);
-}, [query]);
-// Changer un autre état ne change pas query : résultat réutilisable.`,
+    code: examples.useMemo,
     question: "Le code doit-il rester correct sans useMemo ?",
     options: ["Oui", "Non", "Seulement en production"],
     answer: 0,
@@ -628,14 +528,7 @@ function Field({ ref }: { ref: React.Ref<Handle> }) {
     ],
     details:
       "memo n’empêche pas les mises à jour de l’état propre ou du contexte lu par l’enfant. Une fonction mémorisée peut être inutile si son destinataire n’utilise pas son identité. La démo instrumente les commits après le rendu avec un layout effect et une ref, sans déclencher de rendu supplémentaire. Strict Mode ajoute une vérification au montage : comparez les variations.",
-    code: `const add = useCallback(() => {
-  setCount(c => c + 1);
-}, []); // Le setter est stable, aucun count lu ici.
-
-const Child = memo(function Child({ onAdd }: { onAdd: () => void }) {
-  return <button onClick={onAdd}>Ajouter</button>;
-});
-// <Child onAdd={add} />`,
+    code: examples.useCallback,
     question: "useCallback exécute-t-il la fonction passée ?",
     options: [
       "Oui, à chaque rendu",
@@ -676,14 +569,7 @@ const Child = memo(function Child({ onAdd }: { onAdd: () => void }) {
     ],
     details:
       "La transition planifie le rendu, elle ne rend pas un calcul arbitraire interruptible. React ne peut céder la main qu’entre unités de travail. Après un await, une mise à jour peut nécessiter un nouveau startTransition selon l’usage ; les actions asynchrones demandent aussi une gestion explicite des erreurs et de l’ordre des réponses.",
-    code: `const [text, setText] = useState('');
-const [query, setQuery] = useState('');
-const [isPending, startTransition] = useTransition();
-function change(value: string) {
-  setText(value); // Saisie urgente.
-  startTransition(() => setQuery(value));
-}
-// Les composants de résultats font le travail coûteux.`,
+    code: examples.useTransition,
     question: "Une transition déplace-t-elle le calcul dans un autre thread ?",
     options: ["Oui", "Non", "Seulement avec fetch"],
     answer: 1,
@@ -719,14 +605,7 @@ function change(value: string) {
     ],
     details:
       "useTransition sert quand vous contrôlez la mise à jour ; useDeferredValue quand vous souhaitez différer l’utilisation d’une valeur. Le délai dépend du travail et de la machine. Une saisie lente peut ne produire aucun retard perceptible : la démo ajoute un coût artificiel au rendu.",
-    code: `const [query, setQuery] = useState('');
-const deferredQuery = useDeferredValue(query);
-const stale = query !== deferredQuery;
-
-// Résultats mémorisés : ils peuvent sauter le rendu urgent.
-return <section aria-busy={stale} style={{ opacity: stale ? 0.5 : 1 }}>
-  <MemoizedResults query={deferredQuery} />
-</section>;`,
+    code: examples.useDeferredValue,
     question: "useDeferredValue impose-t-il un délai fixe ?",
     options: [
       "Oui, 300 ms",
@@ -766,17 +645,7 @@ return <section aria-busy={stale} style={{ opacity: stale ? 0.5 : 1 }}>
     ],
     details:
       "Disponible dans React 19. Ici l’action est une fonction asynchrone exécutée côté navigateur. Les actions d’un même hook sont mises en file ; évitez les soumissions involontaires en désactivant le bouton pendant l’attente. Un échec réseau attendu peut être converti en état ; une erreur inattendue relève aussi d’une Error Boundary.",
-    code: `type Result = { message: string; ok: boolean };
-const [result, submit, pending] = useActionState(
-  async (_previous: Result, data: FormData): Promise<Result> => {
-    const name = String(data.get('name') ?? '').trim();
-    if (name.length < 2) return { message: 'Deux caractères minimum.', ok: false };
-    await simulateSave();
-    return { message: 'Bonjour ' + name, ok: true };
-  },
-  { message: '', ok: false },
-);
-// <form action={submit}> … </form>`,
+    code: examples.useActionState,
     question: "Que reçoit l’action en premier argument ?",
     options: ["FormData", "L’état précédent", "L’événement submit"],
     answer: 1,
@@ -813,21 +682,7 @@ const [result, submit, pending] = useActionState(
     ],
     details:
       "Le reducer optimiste doit rester pur. La mise à jour dure pendant l’action ; à sa fin, la valeur confirmée redevient la base. Cette démo n’autorise qu’un envoi à la fois pour isoler le mécanisme ; une application réelle doit aussi traiter les identifiants, les doublons et les réponses concurrentes.",
-    code: `type Message = { id: string; text: string; pending?: boolean };
-const [messages, setMessages] = useState<Message[]>([]);
-const [optimistic, addOptimistic] = useOptimistic(
-  messages,
-  (current, message: Message) => current.some(item => item.id === message.id)
-    ? current // Une confirmation déjà reçue ne doit pas être dupliquée.
-    : [...current, { ...message, pending: true }],
-);
-// Dans une Action :
-async function send(text: string) {
-  const message = { id: crypto.randomUUID(), text };
-  addOptimistic(message);
-  await simulateSave();
-  setMessages(current => [...current, message]);
-}`,
+    code: examples.useOptimistic,
     question: "Après un échec, quelle donnée fait autorité ?",
     options: [
       "La valeur optimiste",
@@ -867,19 +722,7 @@ async function send(text: string) {
     ],
     details:
       "subscribe et getSnapshot sont définis hors du composant dans cette démo. Un troisième argument getServerSnapshot sert au rendu serveur et à l’hydratation ; ce site statique côté client n’en a pas besoin. Pour un store objet, cachez un snapshot immuable jusqu’à la prochaine vraie modification.",
-    code: `let value = 0;
-const listeners = new Set<() => void>();
-const subscribe = (listener: () => void) => {
-  listeners.add(listener);
-  return () => { listeners.delete(listener); };
-};
-const getSnapshot = () => value;
-function increment() {
-  value += 1;
-  listeners.forEach(listener => listener());
-}
-// Dans chaque lecteur :
-const count = useSyncExternalStore(subscribe, getSnapshot);`,
+    code: examples.useSyncExternalStore,
     question: "getSnapshot peut-il retourner {} à chaque appel ?",
     options: [
       "Oui, sans conséquence",
@@ -919,11 +762,7 @@ const count = useSyncExternalStore(subscribe, getSnapshot);`,
     ],
     details:
       "Ce hook a surtout de la valeur pour des abstractions réutilisées. Son deuxième argument est un formateur exécuté lorsque le hook est inspecté. Aucun DevTools n’est nécessaire pour suivre la leçon : la carte d’illustration montre l’intention sans prétendre être une inspection réelle.",
-    code: `function useConnectionDebug() {
-  const [online, setOnline] = useState(true);
-  useDebugValue(online, value => value ? 'Connecté' : 'Hors ligne');
-  return [online, setOnline] as const;
-}`,
+    code: examples.useDebugValue,
     question: "Où apparaît l’étiquette de useDebugValue ?",
     options: [
       "Dans le DOM",
@@ -964,14 +803,7 @@ const count = useSyncExternalStore(subscribe, getSnapshot);`,
     ],
     details:
       "Les refs ne sont pas encore attachées et il ne faut pas dépendre d’un moment précis des mutations DOM. Le hook garantit surtout son exécution avant les layout effects. La démo est volontairement spécialisée : savoir pourquoi on ne l’utilise pas est l’objectif principal.",
-    code: `useInsertionEffect(() => {
-  const style = document.createElement('style');
-  style.textContent = '.insertion-sample { color: ' + color + '; }';
-  document.head.append(style);
-  return () => style.remove();
-}, [color]);
-// Dans le code applicatif, préférez souvent :
-// <p style={{ color }}>Bonjour</p>`,
+    code: examples.useInsertionEffect,
     question: "À qui ce hook est-il principalement destiné ?",
     options: [
       "À tous les formulaires",

@@ -1,3 +1,4 @@
+import MemoExample from "./MemoExample";
 import {
   createContext,
   memo,
@@ -12,7 +13,6 @@ import {
   useImperativeHandle,
   useInsertionEffect,
   useLayoutEffect,
-  useMemo,
   useOptimistic,
   useReducer,
   useRef,
@@ -534,50 +534,8 @@ function ImperativeDemo() {
     </>
   );
 }
-function expensiveFilter(query: string) {
-  const start = performance.now();
-  let checksum = 0;
-  for (let i = 0; i < 1200000; i++) checksum += Math.sqrt(i);
-  const matches = ["React", "TypeScript", "JavaScript", "HTML", "CSS"].filter(
-    (s) => s.toLowerCase().includes(query.toLowerCase()),
-  );
-  return { matches, ms: performance.now() - start, checksum };
-}
 function MemoDemo() {
-  const [query, setQuery] = useState("");
-  const [count, setCount] = useState(0);
-  const direct = expensiveFilter(query);
-  const cached = useMemo(() => expensiveFilter(query), [query]);
-  return (
-    <>
-      <label>
-        Filtrer
-        <input
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Ex. Type"
-        />
-      </label>
-      <button className="primary" onClick={() => setCount((c) => c + 1)}>
-        État indépendant : {count}
-      </button>
-      <div className="two-cols">
-        <div className="mini-card">
-          <strong>Calcul direct</strong>
-          <p>{direct.ms.toFixed(2)} ms · recalculé</p>
-        </div>
-        <div className="mini-card">
-          <strong>Avec useMemo</strong>
-          <p>{cached.ms.toFixed(2)} ms · durée du dernier calcul</p>
-        </div>
-      </div>
-      <p>{cached.matches.join(" · ") || "Aucun résultat"}</p>
-      <p className="demo-note">
-        Le temps mémorisé reste celui du dernier calcul, pas le temps du rendu
-        actuel. Mesures indicatives ; coût artificiel et Strict Mode actifs.
-      </p>
-    </>
-  );
+  return <MemoExample />;
 }
 const CallbackChild = memo(function CallbackChild({
   onAdd,

@@ -46,7 +46,7 @@ Une remise à niveau et 20 chapitres : 18 hooks React Core et deux chapitres tra
 19. useDebugValue
 20. useInsertionEffect
 
-Chaque fiche comprend un problème, un modèle mental, une démo réellement exécutée avec le hook concerné, un extrait TypeScript commenté, des recommandations, des pièges, un approfondissement et deux exercices corrigés (QCM et mini-défi). Les extraits ne sont pas des fichiers autonomes : imports et portions de JSX sont volontairement omis. Le code complet des démos est dans `src/demos.tsx`.
+Chaque fiche comprend un problème, un modèle mental, une démo réellement exécutée avec le hook concerné, un exemple TypeScript autonome, des recommandations, des pièges, un approfondissement et deux exercices corrigés (QCM et mini-défi). Les 20 exemples de `src/examples.ts` incluent les imports, un composant principal `App` exporté par défaut, le JSX et toutes les fonctions nécessaires. Ils peuvent être copiés tels quels dans le fichier `App.tsx` d’un projet React 19.2 + TypeScript. Les actions asynchrones utilisent des simulations locales sans serveur. Les démos interactives du site sont dans `src/demos.tsx`.
 
 La mémorisation automatique par React Compiler est désactivée pour pouvoir observer les différences. Strict Mode reste actif en développement ; les vérifications supplémentaires sont expliquées dans le cours. Les démos de performance ajoutent un coût artificiel borné. Les compteurs de commits de useCallback sont instrumentés après le rendu ; il faut comparer leurs variations.
 
