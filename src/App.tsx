@@ -1,4 +1,6 @@
+import OptimisticLesson from "./OptimisticLesson";
 import { Component, useEffect, useRef, useState } from "react";
+import CallbackLesson, { CallbackQuestions } from "./CallbackLesson";
 import type { ErrorInfo, ReactNode } from "react";
 import {
   ArrowDown,
@@ -509,6 +511,8 @@ function LessonPage({
                 {lesson.title.startsWith("use") ? "ce hook" : "cette notion"} ?
               </h2>
               <p>{lesson.problem}</p>
+              {lesson.id === "useCallback" && <CallbackLesson />}
+              {lesson.id === "useOptimistic" && <OptimisticLesson />}
               <div className="callout">
                 <Lightbulb size={21} />
                 <div>
@@ -618,6 +622,7 @@ function LessonPage({
         {tab === "exercices" && (
           <section className="section-block">
             <Quiz lesson={lesson} />
+            {lesson.id === "useCallback" && <CallbackQuestions />}
             <div className="exercise-card">
               <span className="eyebrow">LE MINI-DÉFI</span>
               <h3>À essayer dans votre éditeur</h3>

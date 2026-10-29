@@ -434,52 +434,50 @@ export default function App() {
 }`,
   useOptimistic: `import { useOptimistic, useState, useTransition } from 'react';
 
-type Message = { id: string; text: string; pending?: boolean };
-
-async function saveMessage(fail: boolean) {
+// Un faux serveur pour tester cet exemple sans backend.
+async function saveLike(fail: boolean) {
   await new Promise(resolve => setTimeout(resolve, 1500));
-  if (fail) throw new Error('Envoi impossible : le message n’a pas été enregistré.');
+  if (fail) throw new Error('Sauvegarde impossible');
 }
 
-export default function App() {
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [error, setError] = useState('');
+export default function LikeCounter() {
+  const [likes, setLikes] = useState(12); // Nombre confirmé
+  const [optimisticLikes, setOptimisticLikes] = useOptimistic(likes);
   const [pending, startTransition] = useTransition();
-  const [optimistic, addOptimistic] = useOptimistic(messages,
-    (current, message: Message) => current.some(item => item.id === message.id)
-      ? current : [...current, { ...message, pending: true }]);
+  const [fail, setFail] = useState(false);
+  const [error, setError] = useState('');
 
-  function send(data: FormData) {
-    const text = String(data.get('text') ?? '').trim();
-    if (!text) { setError('Saisissez un message.'); return; }
-    const message = { id: crypto.randomUUID(), text };
-    const fail = data.get('fail') === 'on';
+  function addLike() {
+    const nextLikes = likes + 1;
     setError('');
+
     startTransition(async () => {
-      addOptimistic(message);
+      // 1. Afficher +1 tout de suite, sans changer likes.
+      setOptimisticLikes(nextLikes);
       try {
-        await saveMessage(fail);
-        startTransition(() => setMessages(current => [...current, message]));
-      } catch (error) {
-        setError(error instanceof Error ? error.message : 'Erreur inconnue.');
+        // 2. Attendre la réponse du serveur.
+        await saveLike(fail);
+        // 3. Succès : confirmer le nouveau nombre.
+        startTransition(() => setLikes(nextLikes));
+      } catch {
+        // Échec : likes reste inchangé. À la fin de l’Action,
+        // useOptimistic revient automatiquement à cette valeur.
+        setError('Le like n’a pas été enregistré. Réessayez.');
       }
     });
   }
 
   return (
     <main>
-      <h1>Une messagerie optimiste</h1>
-      <form action={send}>
-        <fieldset disabled={pending}>
-          <label>Message : <input name="text" required /></label>
-          <label><input name="fail" type="checkbox" /> Simuler un échec</label>
-          <button type="submit">{pending ? 'Envoi…' : 'Envoyer'}</button>
-        </fieldset>
-      </form>
-      <p role="alert">{error}</p>
-      <ul aria-live="polite">{optimistic.map(message => (
-        <li key={message.id}>{message.text}{message.pending ? ' (Envoi…)' : ' ✓'}</li>
-      ))}</ul>
+      <p>Aujourd’hui, j’apprends les hooks React !</p>
+      <button onClick={addLike} disabled={pending}>👍 J’aime</button>
+      <p aria-live="polite">{optimisticLikes} mentions J’aime</p>
+      <label>
+        <input type="checkbox" checked={fail} disabled={pending}
+          onChange={event => setFail(event.target.checked)} />
+        Simuler une erreur du serveur
+      </label>
+      <p role="status">{error || (pending ? 'Confirmation en cours…' : '')}</p>
     </main>
   );
 }`,

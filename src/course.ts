@@ -508,21 +508,23 @@ export const lessons: Lesson[] = [
     group: 3,
     minutes: 20,
     level: "Intermédiaire",
-    subtitle: "Stabiliser l’identité d’une fonction.",
+    subtitle: "Comprendre memo, stabiliser les callbacks et mesurer le gain.",
     problem:
-      "Une nouvelle fonction passée à un enfant mémorisé peut invalider sa comparaison de props.",
+      "À chaque rendu du composant, les fonctions déclarées dans son corps sont recréées. Même code ne veut pas dire même référence ! Pour comprendre useCallback, commençons par le rôle de memo et sa comparaison des props.",
     mental:
-      "useMemo mémorise un résultat ; useCallback mémorise une fonction, sans l’exécuter.",
-    task: "Changez le compteur du parent. Comparez les compteurs de commits des deux enfants mémorisés.",
+      "memo peut éviter de réexécuter un enfant dont toutes les props sont identiques. useCallback conserve une référence de fonction pour que cette comparaison puisse réussir.",
+    task: "Changez le compteur du parent. Comparez les trois cas : sans memo, avec memo et une nouvelle fonction, puis avec memo et useCallback. Essayez aussi les trois boutons Ajouter : ils restent tous fonctionnels.",
     observe:
-      "La fonction ordinaire change d’identité. La fonction mémorisée reste identique tant que ses dépendances ne changent pas.",
+      "Les deux premiers compteurs augmentent. Le troisième reste stable lors des mises à jour du parent : memo retrouve la même prop onAdd grâce à useCallback. Ces compteurs mesurent les commits validés, pas tous les appels du composant ni les changements du DOM.",
     good: [
       "Utilisez-le lorsqu’une identité stable a une utilité mesurée.",
-      "Associez la démonstration à un enfant memo pour comprendre son effet.",
+      "memo peut servir même sans callback : vérifiez si les props restent identiques lors des rendus du parent.",
+      "Comparez la même interaction avec et sans memo dans le Profiler de React DevTools ; répétez les mesures.",
       "Utilisez les setters fonctionnels pour éviter de lire un état inutilement.",
     ],
     avoid: [
-      "Croire que useCallback empêche tous les rendus.",
+      "Mettre memo partout sans vérifier le bénéfice, ou confondre moins de rendus avec une interaction plus rapide.",
+      "Croire que useCallback seul empêche les rendus de l’enfant.",
       "Passer d’autres props toujours nouvelles à l’enfant puis attendre un bénéfice.",
       "Omettre une dépendance et garder une closure obsolète.",
     ],
@@ -539,9 +541,9 @@ export const lessons: Lesson[] = [
     explanation:
       "Le callback est appelé ensuite par votre code, par exemple lors d’un clic.",
     exercise:
-      "Une fonction utilise productId. Quel tableau de dépendances lui donner ?",
+      "Un enfant reçoit name et onSelect, qui lit productId. Le parent change souvent un compteur indépendant. Expliquez d’abord ce que memo peut éviter, puis stabilisez onSelect avec les bonnes dépendances. Décrivez comment vérifier un gain de performance et où lire les résultats.",
     solution:
-      "Incluez productId ainsi que toutes les autres valeurs réactives qu’elle lit. Un tableau vide capturerait le productId initial.",
+      "memo peut sauter le rendu venant du parent si name et onSelect sont identiques. useCallback doit inclure productId et toutes les autres valeurs réactives lues ; [] capturerait le productId initial. Si name ou productId change, le rendu reste nécessaire. Enregistrez plusieurs fois la même interaction avec et sans optimisation dans l’onglet Profiler de React DevTools et comparez les durées, pas seulement le nombre de rendus. Avec le composant Profiler, lisez les mesures dans onRender, par exemple via console.log dans la console du navigateur.",
   },
   {
     id: "useTransition",
@@ -667,9 +669,9 @@ export const lessons: Lesson[] = [
       "Attendre la fin d’une sauvegarde pour afficher toute réaction rend parfois l’interface inutilement lente.",
     mental:
       "Une couche temporaire anticipe le résultat pendant l’action. Les données confirmées restent la référence.",
-    task: "Ajoutez un message avec un délai long. Recommencez en simulant une erreur.",
+    task: "Cliquez sur J’aime avec un délai long : le compteur augmente tout de suite. Simulez ensuite une erreur et cliquez à nouveau : le compteur revient à sa valeur précédente.",
     observe:
-      "Le message apparaît immédiatement avec un statut provisoire. Après un échec, il disparaît et une erreur explique ce qui s’est passé.",
+      "Le compteur passe de 12 à 13 immédiatement. Si le serveur confirme, il reste à 13. Si le serveur échoue, il revient à 12. Chaque nouveau clic ajoute un like.",
     good: [
       "Déclenchez la mise à jour optimiste dans une Action ou une transition.",
       "Marquez les données non confirmées.",
@@ -681,7 +683,7 @@ export const lessons: Lesson[] = [
       "Optimiser ainsi une opération irréversible sans retour clair.",
     ],
     details:
-      "Le reducer optimiste doit rester pur. La mise à jour dure pendant l’action ; à sa fin, la valeur confirmée redevient la base. Cette démo n’autorise qu’un envoi à la fois pour isoler le mécanisme ; une application réelle doit aussi traiter les identifiants, les doublons et les réponses concurrentes.",
+      "Dans cet exemple, useOptimistic(likes) suffit : on lui transmet directement le nombre temporaire à afficher. La mise à jour dure pendant l’action ; à sa fin, la valeur confirmée redevient la base. await garde l’Action en cours pendant la requête. Le hook ne détecte pas les erreurs réseau : notre code les intercepte et ne modifie la base qu’en cas de succès. Cette démo autorise une seule requête à la fois ; une application réelle doit aussi gérer les réponses concurrentes.",
     code: examples.useOptimistic,
     question: "Après un échec, quelle donnée fait autorité ?",
     options: [
@@ -692,9 +694,9 @@ export const lessons: Lesson[] = [
     answer: 1,
     explanation:
       "L’optimisme est une présentation provisoire. Sans confirmation, on revient à la base fiable.",
-    exercise: "Pourquoi afficher « Envoi… » à côté du message ?",
+    exercise: "Le compteur passe à 13, puis le serveur refuse le like. Pourquoi revient-il à 12 sans appeler setOptimisticLikes(12) ?",
     solution:
-      "Pour distinguer une anticipation de la confirmation réelle et éviter de laisser croire que la sauvegarde a déjà réussi.",
+      "La base likes est restée à 12 car setLikes n’est appelé qu’après une sauvegarde réussie. Quand l’Action se termine, React retire la valeur optimiste ; l’affichage repart de likes, donc de 12 likes. Le catch affiche l’erreur, mais ne réalise pas lui-même ce retour.",
   },
   {
     id: "useSyncExternalStore",

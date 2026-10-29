@@ -23,7 +23,6 @@ import {
 import type { Ref } from "react";
 import {
   ArrowUpRight,
-  Check,
   Minus,
   Plus,
   Send,
@@ -537,7 +536,7 @@ function ImperativeDemo() {
 function MemoDemo() {
   return <MemoExample />;
 }
-const CallbackChild = memo(function CallbackChild({
+function CallbackChild({
   onAdd,
 }: {
   onAdd: () => void;
@@ -560,7 +559,8 @@ const CallbackChild = memo(function CallbackChild({
       </p>
     </>
   );
-});
+}
+const MemoCallbackChild = memo(CallbackChild);
 function CallbackDemo() {
   const [parent, setParent] = useState(0);
   const [count, setCount] = useState(0);
@@ -572,12 +572,19 @@ function CallbackDemo() {
       </button>
       <div className="two-cols">
         <div className="mini-card">
-          <strong>Callback ordinaire</strong>
-          <CallbackChild onAdd={() => setCount((c) => c + 1)} />
+          <strong>1. Sans memo + fonction stable</strong>
+          <CallbackChild onAdd={stable} />
+          <p>Mêmes props, mais l’enfant se réexécute avec le parent.</p>
         </div>
         <div className="mini-card">
-          <strong>Callback stable</strong>
-          <CallbackChild onAdd={stable} />
+          <strong>2. Avec memo + nouvelle fonction</strong>
+          <MemoCallbackChild onAdd={() => setCount((c) => c + 1)} />
+          <p>La référence de onAdd change : memo laisse passer le rendu.</p>
+        </div>
+        <div className="mini-card">
+          <strong>3. Avec memo + useCallback</strong>
+          <MemoCallbackChild onAdd={stable} />
+          <p>La prop reste identique : memo peut éviter ce rendu.</p>
         </div>
       </div>
       <p>Total : {count}</p>
@@ -717,84 +724,39 @@ function ActionDemo() {
     </>
   );
 }
-type Message = {
-  id: string;
-  text: string;
-  pending?: boolean;
-};
 function OptimisticDemo() {
-  const [network, setNetwork] = useState<NetworkOptions>({
-    delay: 1500,
-    fail: false,
-  });
-  const [messages, setMessages] = useState<Message[]>([
-    { id: "hello", text: "Bienvenue dans l’atelier !" },
-  ]);
-  const [optimistic, addOptimistic] = useOptimistic(
-    messages,
-    (current, message: Message) =>
-      current.some((item) => item.id === message.id)
-        ? current
-        : [...current, { ...message, pending: true }],
-  );
+  const [network, setNetwork] = useState<NetworkOptions>({ delay: 1500, fail: false });
+  const [likes, setLikes] = useState(12);
+  const [optimisticLikes, setOptimisticLikes] = useOptimistic(likes);
+  const [pending, startTransition] = useTransition();
   const [error, setError] = useState("");
-  const [, submit, pending] = useActionState(
-    async (_: null, data: FormData) => {
-      const text = String(data.get("message") ?? "").trim();
-      if (!text) return null;
-      const message = { id: crypto.randomUUID(), text };
-      setError("");
-      addOptimistic(message);
+  function addLike() {
+    const nextLikes = likes + 1;
+    setError("");
+    startTransition(async () => {
+      setOptimisticLikes(nextLikes);
       try {
-        await request("save", network, undefined, message);
-        setMessages((m) => [...m, message]);
+        await request("save", network, undefined, { likes: nextLikes });
+        startTransition(() => setLikes(nextLikes));
       } catch {
-        setError(
-          "Échec de l’envoi. Le message provisoire est retiré ; vous pouvez réessayer.",
-        );
+        setError("Le serveur a refusé la modification. Retour automatique au dernier état confirmé ; vous pouvez réessayer.");
       }
-      return null;
-    },
-    null,
-  );
+    });
+  }
   return (
     <>
       <NetworkControls value={network} onChange={setNetwork} />
-      <div className="messages" aria-live="polite">
-        {optimistic.map((m) => (
-          <div className={m.pending ? "message pending" : "message"} key={m.id}>
-            <span>{m.text}</span>
-            <small>
-              {m.pending ? (
-                "Envoi…"
-              ) : (
-                <>
-                  <Check size={12} /> Confirmé
-                </>
-              )}
-            </small>
-          </div>
-        ))}
-      </div>
-      <form action={submit} className="inline-form">
-        <input
-          name="message"
-          aria-label="Votre message"
-          required
-          placeholder="Un message pour le groupe…"
-          maxLength={180}
-        />
-        <button
-          className="primary"
-          disabled={pending}
-          aria-label="Envoyer le message"
-        >
-          <Send size={16} />
-          {pending ? "Envoi…" : "Envoyer"}
+      <div className="callout"><div>
+        <strong>Le fil de l’atelier</strong>
+        <p>« Aujourd’hui, j’ai compris useOptimistic ! »</p>
+        <button type="button" className="primary" disabled={pending} onClick={addLike}>
+          👍 J’aime
         </button>
-      </form>
-      <p className="error-text" role="status">
-        {error}
+        <p aria-live="polite">{optimisticLikes} mentions J’aime</p>
+      </div></div>
+      <p role="status" className={error ? "error-text" : ""}>
+        {error || (pending ? "Confirmation en cours… Le bouton a déjà réagi, le serveur travaille encore."
+          : "Cliquez sur J’aime : le compteur augmente immédiatement. Le serveur est simulé dans cet atelier.")}
       </p>
     </>
   );
