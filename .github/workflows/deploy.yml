@@ -1,7 +1,9 @@
 name: Déployer sur GitHub Pages
 
-# Le déploiement reste manuel pendant la validation du cours.
+# Publication de main après validation, ou déclenchement manuel.
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
