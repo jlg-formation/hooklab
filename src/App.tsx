@@ -1,3 +1,4 @@
+import Lifecycle from "./Lifecycle";
 import OptimisticLesson from "./OptimisticLesson";
 import { Component, useEffect, useRef, useState } from "react";
 import CallbackLesson, { CallbackQuestions } from "./CallbackLesson";
@@ -302,13 +303,7 @@ function Greeting({ name, details }: GreetingProps) {
           prochain JSX et applique les modifications nécessaires au DOM. Rendre
           le composant ne signifie pas reconstruire tout le DOM.
         </p>
-        <div className="flow">
-          <span>Événement</span>
-          <ArrowRight size={16} />
-          <span>Mise à jour d’état</span>
-          <ArrowRight size={16} />
-          <span>Rendu → commit</span>
-        </div>
+        <Lifecycle />
         <div className="callout">
           <Lightbulb size={20} />
           <p>
