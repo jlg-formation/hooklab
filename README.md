@@ -74,7 +74,9 @@ bun run node_modules/msw/cli/index.js init public --save
 
 ## Déployer sur GitHub Pages après validation
 
-Le workflow `.github/workflows/deploy.yml` est **manuel** : rien n’est publié automatiquement.
+Le dépôt public est [jlg-formation/hooklab](https://github.com/jlg-formation/hooklab). Le site est publié sur [GitHub Pages](https://jlg-formation.github.io/hooklab/).
+
+Le workflow `.github/workflows/deploy.yml` publie chaque push sur `main`. Il peut également être déclenché manuellement.
 
 1. Créer ou choisir un dépôt GitHub, puis y pousser les sources, `bun.lock`, le worker et le workflow. Ne pas pousser `node_modules/`, `dist/` ou les caches.
 2. Dans **Settings → Pages → Build and deployment**, sélectionner **GitHub Actions**.
@@ -83,7 +85,7 @@ Le workflow `.github/workflows/deploy.yml` est **manuel** : rien n’est publié
 
 La configuration Vite utilise `base: './'` et la navigation utilise des hashes. Le site fonctionne à la racine d’un domaine ou sous `/nom-du-depot/` sans règle de réécriture et sans modification de `base`. Conserver le slash final de l’URL du dépôt pour la résolution des assets et du worker.
 
-Aucun déploiement n’a été réalisé par la création de ce projet. Le workflow demandera les permissions Pages standard lors de sa première exécution.
+GitHub Pages utilise GitHub Actions comme source de publication. Pour les changements suivants, pousser sur `main` puis vérifier la réussite du workflow avant de partager la nouvelle version.
 
 ## Structure
 

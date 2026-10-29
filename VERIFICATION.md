@@ -25,4 +25,4 @@ Tests réalisés avec les outils de navigateur, sans suite automatisée persista
 
 ## Portée et revue restante
 
-Le déploiement GitHub Pages n’a pas été exécuté. Le workflow est déclenchable manuellement après votre revue. Les essais ne constituent pas un audit d’accessibilité exhaustif ni une validation sur tous les navigateurs. Les mini-défis se font dans un éditeur externe ; l’éditeur intégré est prévu pour une éventuelle phase 2.
+Le déploiement GitHub Pages est configuré dans le dépôt public `jlg-formation/hooklab`, après confirmation de la publication des sources. Le workflow se déclenche sur les pushes vers `main`, ou manuellement. Les essais ne constituent pas un audit d’accessibilité exhaustif ni une validation sur tous les navigateurs. Les mini-défis se font dans un éditeur externe ; l’éditeur intégré est prévu pour une éventuelle phase 2.
